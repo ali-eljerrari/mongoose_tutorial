@@ -23,7 +23,6 @@ const Home = () => {
     try {
       const res = await axios.get("/api/users/read");
 
-      // console.log(res.data);
       setData(res.data);
     } catch (error: any) {
       setError(error);

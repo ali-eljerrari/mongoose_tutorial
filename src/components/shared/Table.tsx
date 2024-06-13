@@ -155,6 +155,7 @@ export const columns: (
                   await axios.post("/api/users/delete", {
                     _id: data._id,
                   });
+
                   window.location.reload();
                 } catch (error) {
                   console.log(error);
