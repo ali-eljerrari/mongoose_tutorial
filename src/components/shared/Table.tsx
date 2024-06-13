@@ -40,6 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import axios from "axios";
 
 export type Data = {
   _id: string;
@@ -140,7 +141,28 @@ export const columns: (
             >
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  const info = prompt("Are you sure?\n\nType 'yes' to Confirm");
+
+                  if (info !== "yes") return;
+
+                  if (!data._id) {
+                    return;
+                  }
+
+                  await axios.post("/api/users/delete", {
+                    _id: data._id,
+                  });
+                  window.location.reload();
+                } catch (error) {
+                  console.log(error);
+                }
+              }}
+            >
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -152,12 +174,16 @@ const DataTableDemo = ({
   data,
   openSheet,
   setOpenSheet,
+  openDialog,
+  setOpenDialog,
   selectedRecord,
   setSelectedRecord,
 }: {
   data: Data[];
   openSheet: boolean;
-  setOpenSheet: any;
+  setOpenSheet: (open: boolean) => void;
+  openDialog: boolean;
+  setOpenDialog: (open: boolean) => void;
   selectedRecord: string;
   setSelectedRecord: (record: string) => void;
 }) => {
@@ -202,7 +228,11 @@ const DataTableDemo = ({
           className="max-w-sm"
         />
         <DropdownMenu>
-          <Button variant="default" className="ml-auto">
+          <Button
+            variant="default"
+            className="ml-auto"
+            onClick={() => setOpenDialog(!openDialog)}
+          >
             New <PencilLine className="ml-2 h-4 w-4" />
           </Button>
           <DropdownMenuTrigger asChild>

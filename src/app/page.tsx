@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import DataTableDemo from "../components/shared/Table";
 import SheetDemo from "@/components/shared/Sheet";
+import { DialogDemo } from "@/components/shared/Dialog";
 
 const Home = () => {
   const [data, setData] = useState<
@@ -14,11 +15,13 @@ const Home = () => {
 
   const [openSheet, setOpenSheet] = useState(false);
 
+  const [openDialog, setOpenDialog] = useState(false);
+
   const [selectedRecord, setSelectedRecord] = useState<string>("");
 
   const fetchData = async () => {
     try {
-      const res = await axios.get("/api/users");
+      const res = await axios.get("/api/users/read");
 
       // console.log(res.data);
       setData(res.data);
@@ -39,6 +42,8 @@ const Home = () => {
           data={data}
           openSheet={openSheet}
           setOpenSheet={setOpenSheet}
+          openDialog={openDialog}
+          setOpenDialog={setOpenDialog}
           selectedRecord={selectedRecord}
           setSelectedRecord={setSelectedRecord}
         />
@@ -48,6 +53,8 @@ const Home = () => {
         setOpenSheet={setOpenSheet}
         item={data?.filter((item) => item._id === selectedRecord)[0]}
       />
+
+      <DialogDemo openDialog={openDialog} setOpenDialog={setOpenDialog} />
     </main>
   );
 };

@@ -1,7 +1,7 @@
-// lib/dbConnect.js
+// src/app/config/mongooseConnection.ts
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
   throw new Error(
@@ -13,15 +13,21 @@ if (!MONGODB_URI) {
  * Global is used to maintain a cached connection across hot reloads in development.
  * This prevents connections growing exponentially during API Route usage.
  */
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+declare global {
+  // Allow the `mongoose` global variable to be declared
+  var mongoose: {
+    conn: mongoose.Connection | null;
+    promise: Promise<mongoose.Connection> | null;
+  };
 }
+
+// Initialize the `mongoose` global variable if it does not exist
+global.mongoose = global.mongoose || { conn: null, promise: null };
+
+let cached = global.mongoose;
 
 async function dbConnect() {
   if (cached.conn) {
-    console.log("Using existing mongoose connection");
     return cached.conn;
   }
 
@@ -30,25 +36,12 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    console.log("Creating new mongoose connection promise");
-    cached.promise = mongoose
-      .connect(MONGODB_URI, opts)
-      .then((mongoose) => {
-        console.log("Mongoose connection established");
-        return mongoose;
-      })
-      .catch((error) => {
-        console.error("Mongoose connection error:", error);
-      });
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      return mongoose.connection;
+    });
   }
 
-  try {
-    cached.conn = await cached.promise;
-    console.log("Mongoose connection resolved");
-  } catch (error) {
-    console.error("Error resolving mongoose connection promise:", error);
-  }
-
+  cached.conn = await cached.promise;
   return cached.conn;
 }
 

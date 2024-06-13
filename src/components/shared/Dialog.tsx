@@ -1,63 +1,66 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const SheetDemo = ({ openSheet, setOpenSheet, item }: any) => {
+export function DialogDemo({
+  openDialog,
+  setOpenDialog,
+}: {
+  openDialog: boolean;
+  setOpenDialog: (open: boolean) => void;
+}) {
   const [input, setInput] = useState({ name: "", email: "", age: 18 });
 
-  useEffect(() => {
-    setInput({ ...item });
+  const handleOnSubmit = async (user: any) => {
+    //! validate input
 
+    try {
+      if (!user.name || !user.email) {
+        return;
+      }
+
+      await axios.post("/api/users/create", { user });
+
+      // setOpenDialog(false);
+
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
     return () => {
       // console.log("cleaning up...");
       setInput({ name: "", email: "", age: 18 });
     };
-  }, [item, openSheet]);
-
-  const handleOnSubmit = async (e: any) => {
-    //! check if the is no modification, compare item to input
-    try {
-      if (!item._id || !input.name || !input.email) {
-        return;
-      }
-
-      await axios.post("/api/users/update", {
-        _id: item._id,
-        user: input,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-
-    window.location.reload();
-  };
+  }, [openDialog]);
 
   return (
-    <Sheet open={openSheet} onOpenChange={() => setOpenSheet(!openSheet)}>
-      <SheetTrigger asChild>
+    <Dialog open={openDialog} onOpenChange={() => setOpenDialog(!openDialog)}>
+      <DialogTrigger asChild>
         <Button variant="outline" className="hidden">
-          Open
+          Edit Profile
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Edit profile</SheetTitle>
-          <SheetDescription>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit profile</DialogTitle>
+          <DialogDescription>
             Make changes to your profile here. Click save when you&apos;re done.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
@@ -96,17 +99,12 @@ const SheetDemo = ({ openSheet, setOpenSheet, item }: any) => {
             />
           </div>
         </div>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button variant="outline">Discard</Button>
-          </SheetClose>
+        <DialogFooter>
           <Button type="submit" onClick={() => handleOnSubmit(input)}>
             Save changes
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default SheetDemo;
+}
